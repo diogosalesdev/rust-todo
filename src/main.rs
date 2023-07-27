@@ -1,4 +1,5 @@
 pub mod model;
+pub mod resposta;
 
 use actix_web::middleware::Logger;
 use actix_web::{get, App, HttpResponse, HttpServer, Responder};
