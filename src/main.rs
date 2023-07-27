@@ -1,3 +1,5 @@
+pub mod model;
+
 use actix_web::middleware::Logger;
 use actix_web::{get, App, HttpResponse, HttpServer, Responder};
 use serde::Serialize;
@@ -33,7 +35,7 @@ async fn main() -> std::io::Result<()> {
             .service(health_checker_handler)  
             .wrap(Logger::default())
     })
-    .bind(("127.0.0.1", 8000))?
+    .bind(("127.0.0.1", 8085))?
     .run()
     .await
 }
