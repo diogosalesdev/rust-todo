@@ -18,3 +18,23 @@ async fn health_checker_handler() -> impl Responder {
     };
     HttpResponse::Ok().json(response_json)
 }
+
+
+pub async fn todos_list_handler(
+    opts: web::Query<QueryOptions>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let todos = data.todo_db.lock().unwrap();
+
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    let todos: Vec<Todo> = todos.clone().into_iter().skip(offset).take(limit).collect();
+
+    let json_response = TodoListResponse {
+        status: "success".to_string(),
+        results: todos.len(),
+        todos,
+    };
+    HttpResponse::Ok().json(json_response)
+}
