@@ -19,7 +19,7 @@ async fn health_checker_handler() -> impl Responder {
     HttpResponse::Ok().json(response_json)
 }
 
-
+#[get("/todos")]
 pub async fn todos_list_handler(
     opts: web::Query<QueryOptions>,
     data: web::Data<AppState>,
@@ -36,5 +36,42 @@ pub async fn todos_list_handler(
         results: todos.len(),
         todos,
     };
+    HttpResponse::Ok().json(json_response)
+}
+
+#[post("/todos")]
+pub async fn create_todo_handler(
+    mut body: web::Json<Todo>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let mut vec = data.todo_db.lock().unwrap();
+
+    let todo = vec.iter().find(|todo| todo.title == body.title);
+
+    if todo.is_some() {
+        let error_response = GenericResponse {
+            status: "fail".to_string(),
+            message: format!("Todo with title: '{}' already exists", body.title),
+        };
+        return HttpResponse::Conflict().json(error_response);
+    }
+
+    let uuid_id = Uuid::new_v4();
+    let datatime = Utc::now();
+
+    body.id = Some(uuid_id.to_string());
+    body.completed = Some(false);
+    body.createdAt = Some(datatime);
+    body.updatedAt = Some(datatime);
+
+    let todo = body.to_owned();
+
+    vec.push(body.into_inner());
+
+    let json_response = SingleTodoResponse {
+        status: "success".to_string(),
+        data: TodoData { todo: todo },
+    };
+
     HttpResponse::Ok().json(json_response)
 }
