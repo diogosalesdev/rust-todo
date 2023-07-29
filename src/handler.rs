@@ -75,3 +75,29 @@ pub async fn create_todo_handler(
 
     HttpResponse::Ok().json(json_response)
 }
+
+#[get("/todos/{id}")]
+pub async fn get_todo_handler(
+    path: web::Path<String>,
+    data: web::Data<AppState>,
+) -> impl Responder {
+    let vec = data.todo_db.lock().unwrap();
+
+    let id = path.into_inner();
+    let todo = vec.iter().find(|todo| todo.id == Some(id.to_owned()));
+
+    if todo.is_none() {
+        let error_response = GenericResponse {
+            status: "fail".to_string(),
+            message: format!("Todo with ID: {} not found", id),
+        };
+        return HttpResponse::NotFound().json(error_response)
+    }
+
+    let todo = todo.unwrap();
+    let json_response = SingleTodoResponse {
+        status: "success".to_string(),
+        data: TodoData { todo: todo.clone() },
+    };
+    HttpResponse::Ok().json(json_response)
+}
