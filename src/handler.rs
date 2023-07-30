@@ -1,5 +1,3 @@
-use std::path;
-
 use crate::{
     model::{AppState, QueryOptions, Todo, UpdateTodoSchema},
     response::{GenericResponse, SingleTodoResponse, TodoData, TodoListResponse},
