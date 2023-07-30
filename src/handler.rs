@@ -178,3 +178,15 @@ pub async fn delete_todo_handler(
     vec.retain(|todo| todo.id != Some(id.to_owned()));
     HttpResponse::NoContent().finish()
 }
+
+pub fn config(conf: &mut web::ServiceConfig) {
+    let scope = web::scope("/api")
+        .service(health_checker_handler)
+        .service(todos_list_handler)
+        .service(create_todo_handler)
+        .service(get_todo_handler)
+        .service(edit_todo_handler)
+        .service(delete_todo_handler);
+
+    conf.service(scope);
+}
